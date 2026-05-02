@@ -36,6 +36,7 @@ _Telescope integration using `:Telescope recall theme=ivy`._
   - [Snacks statuscolumn compatibility](#snacks-statuscolumn-compatibility)
   - [Project-specific global marks](#project-specific-global-marks)
   - [The `wshada` option](#the-wshada-option)
+  - [Custom Storage](#custom-storage)
   - [Usage commands](#usage-commands)
     - [Navigation logic](#navigation-logic)
 - [Inspirations](#inspirations)
@@ -70,7 +71,13 @@ require("recall").setup({
   },
 
   wshada = vim.fn.has("nvim-0.10") == 0,
-})
+
+  storage = {
+    enabled = true,
+    path = vim.fn.stdpath("state") .. "/recall",
+  },
+}
+)
 ```
 
 Recall ships with no mappings by default. Add your own, using the Lua API or
@@ -234,6 +241,34 @@ guarantee their persistence in the [`shada` file][shada-docs].
 
 To learn more about this, see the related [issue][shada-issue] and [pull
 request][shada-pr] including a fix that ships with Neovim 0.10.
+
+### Custom Storage
+
+By default, `recall.nvim` now uses a custom storage mechanism to persist marks
+on a per-project basis. This avoids the common issue of global marks being
+shared across different projects when using the same Neovim instance or `shada`
+file.
+
+Marks are saved as JSON files in Neovim's state directory (usually
+`~/.local/state/nvim/recall` on Linux). The storage is keyed by the current
+working directory.
+
+You can configure it or disable it in your setup:
+
+```lua
+require("recall").setup({
+  storage = {
+    enabled = true,
+    path = vim.fn.stdpath("state") .. "/recall",
+  },
+})
+```
+
+When `storage.enabled` is `true`, `recall.nvim` will:
+- Load marks for the current project on `VimEnter`.
+- Save marks when they are modified.
+- Load marks when the working directory changes (`DirChanged`).
+- Save marks on `VimLeavePre`.
 
 [shada-docs]: https://neovim.io/doc/user/starting.html#shada
 [shada-issue]: https://github.com/neovim/neovim/issues/4295

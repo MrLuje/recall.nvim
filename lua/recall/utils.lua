@@ -40,7 +40,18 @@ M.set_cursor_for_mark_in_window = function(window_id, mark)
   if window_id ~= 0 then
     vim.api.nvim_set_current_win(window_id)
   end
-  vim.api.nvim_win_set_cursor(0, { mark.pos[2], mark.pos[3] })
+
+  local bufnr = vim.api.nvim_win_get_buf(0)
+  local line_count = vim.api.nvim_buf_line_count(bufnr)
+  local lnum = math.min(mark.pos[2], line_count)
+  local col = mark.pos[3]
+
+  -- Ensure line number is at least 1 if buffer is not empty
+  if lnum == 0 and line_count > 0 then
+    lnum = 1
+  end
+
+  vim.api.nvim_win_set_cursor(0, { lnum, col })
 end
 
 M.set_cursor_for_mark_in_current_window = function(mark)

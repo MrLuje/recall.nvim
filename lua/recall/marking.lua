@@ -21,6 +21,10 @@ M.on_mark_update = function()
   if config.opts.wshada then
     vim.cmd("wshada!")
   end
+
+  if config.opts.storage.enabled then
+    require("recall.storage").save()
+  end
 end
 
 M.is_mark_set = function(mark)
